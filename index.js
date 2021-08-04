@@ -1,13 +1,15 @@
-const express = require('express')
-const bodyParser = require('body-parser')
-const jwt = require('express-jwt')
+const express = require('express');
+const bodyParser = require('body-parser');
+const expressJwt = require('express-jwt');
+const jwt = require('jsonwebtoken')
 const cors = require('cors')
 
 const app = express()
 const port = process.env.PORT || 8888
 
-const jwtCheck = jwt({
-    secret: 'mysecret'
+const jwtCheck = expressJwt({
+    secret: 'mysupersecretkey',
+    algorithms: ["HS256"]
 })
 
 const users = [
@@ -39,34 +41,34 @@ app.get('/resource/secret', jwtCheck, (req, res) => {
 })
 
 
-// app.post('/login', (req, res) => {
-//     if (!req.body.username || !req.body.password) {
-//         res
-//         .status(400)
-//         .send('You need a username and password!')
-//         return  
-//     }
+app.post('/login', (req, res) => {
+    if (!req.body.username || !req.body.password) {
+        res
+        .status(400)
+        .send('You need a username and password!')
+        return  
+    }
 
-//     const user = users.find((u) => {
-//         return u.username === req.body.username && u.password === req.body.password
-//     })
+    const user = users.find((u) => {
+        return u.username === req.body.username && u.password === req.body.password
+    })
 
-//     if (!user) {
-//         res
-//         .status(401)
-//         .send('User wasn\'t found')
-//         return        
-//     }
+    if (!user) {
+        res
+        .status(401)
+        .send('User wasn\'t found')
+        return        
+    }
 
-//     const token = jwt.sign({
-//         sub: user.id,
-//         username: user.username
-//     }, 'mysupersecretkey', {expiresIn: "3 hours"})
+    const token = jwt.sign({
+        sub: user.id,
+        username: user.username
+    }, 'mysupersecretkey', {algorithm: "HS256" ,expiresIn: "3 hours",})
 
-//     res
-//     .status(200)
-//     .send({access_token: token});
-// })
+    res
+    .status(200)
+    .send({access_token: token});
+})
 
 app.get('*', (req, res) => {
     res.sendStatus(404)
